@@ -1,0 +1,35 @@
+{
+  "realm": "bad-realm",
+  "enabled": true,
+  "attributes": {"environment": "production"},
+  "accessTokenLifespan": 3600,
+  "revokeRefreshToken": false,
+  "clients": [
+    {
+      "clientId": "bad-public-app",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "https://app.example.test/*",
+        "http://app.example.test/callback",
+        "http://localhost:3000/callback"
+      ],
+      "attributes": {"pkce.code.challenge.method": "plain"}
+    },
+    {
+      "clientId": "exported-confidential-app",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["https://service.example.test/callback"],
+      "secret": "deliberately-redacted-by-oidc-audit",
+      "attributes": {"access.token.lifespan": "1800"}
+    }
+  ]
+}
+
