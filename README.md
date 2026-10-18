@@ -39,8 +39,8 @@ Audit a live issuer using only its public metadata and keys:
 oidc-audit lint --issuer https://login.example.test/realms/main
 ```
 
-The issuer and its `jwks_uri` must use HTTPS, except for `localhost` and
-loopback test systems.
+The issuer and its `jwks_uri` must use HTTPS. Plain HTTP is accepted only when
+the issuer itself is on `localhost` or a loopback address.
 TLS verification is always enabled. Responses are limited to 2 MiB and
 redirects are bounded; HTTPS redirects cannot downgrade to HTTP.
 

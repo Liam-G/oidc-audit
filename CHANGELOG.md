@@ -15,7 +15,11 @@ All notable changes to this project will be documented in this file.
 - Report every wildcard redirect URI, including `*` on its own and relative
   paths such as `/*`, which were previously skipped.
 - Fetch and audit an `http://` JWKS on loopback issuers, and stop reporting it
-  as `OIDC-META-009`.
+  as `OIDC-META-009`. Plain-HTTP loopback endpoints and keys are accepted only
+  when the issuer itself is on loopback; a remote issuer cannot make the audit
+  fetch from the machine running it.
+- Resolve relative redirect URIs against an absolute client `rootUrl`, so
+  `/callback` under an `http://` root is reported as `OIDC-CLIENT-002`.
 - Ignore masked client secrets (`**********`) from admin-console exports.
 - Apply `OIDC-CLIENT-004` only to clients with the browser (standard) flow.
 - Lower `OIDC-META-006` to medium and cite OpenID Connect Discovery §3 for

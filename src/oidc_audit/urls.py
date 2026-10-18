@@ -17,7 +17,13 @@ def is_loopback(hostname: str | None) -> bool:
         return False
 
 
-def is_secure_url(url: str) -> bool:
-    """HTTPS, or plain HTTP to a loopback development host."""
+def is_loopback_url(url: str) -> bool:
+    return is_loopback(urlsplit(url).hostname)
+
+
+def is_secure_url(url: str, *, allow_loopback_http: bool = True) -> bool:
+    """HTTPS, or plain HTTP to a loopback development host when that is allowed."""
     parsed = urlsplit(url)
-    return parsed.scheme == "https" or (parsed.scheme == "http" and is_loopback(parsed.hostname))
+    if parsed.scheme == "https":
+        return True
+    return allow_loopback_http and parsed.scheme == "http" and is_loopback(parsed.hostname)

@@ -31,7 +31,8 @@ def test_bad_discovery_exercises_every_metadata_rule() -> None:
         "https://login.example.test/realms/bad",
     )
     assert ids(findings) == {f"OIDC-META-{number:03}" for number in range(1, 10)}
-    assert sum(item.rule.id == "OIDC-META-002" for item in findings) == 1
+    # A remote issuer gets no loopback exemption: both HTTP endpoints are reported.
+    assert sum(item.rule.id == "OIDC-META-002" for item in findings) == 2
 
 
 def test_good_discovery_is_clean() -> None:
@@ -119,12 +120,37 @@ def test_keycloak_metadata_reports_realm_wide_capabilities_as_info() -> None:
     assert ids(audit_metadata(document, "generic.json")) == {"OIDC-META-003", "OIDC-META-004"}
 
 
-def test_loopback_http_jwks_uri_is_accepted_like_other_endpoints() -> None:
+def test_loopback_http_jwks_uri_is_accepted_on_a_loopback_issuer() -> None:
     document = load(FIXTURES / "good-discovery.json")
+    document["issuer"] = "http://127.0.0.1:8080/realms/good"
     document["jwks_uri"] = "http://127.0.0.1:8080/realms/good/protocol/openid-connect/certs"
     assert audit_metadata(document, "lab.json") == []
     document["jwks_uri"] = "http://login.example.test/certs"
     assert ids(audit_metadata(document, "remote.json")) == {"OIDC-META-009"}
+
+
+def test_loopback_http_jwks_uri_is_reported_on_a_remote_issuer() -> None:
+    document = load(FIXTURES / "good-discovery.json")
+    document["jwks_uri"] = "http://127.0.0.1:9000/internal"
+    assert ids(audit_metadata(document, "remote.json")) == {"OIDC-META-009"}
+
+
+@pytest.mark.parametrize(
+    ("root_url", "expected"),
+    [
+        ("http://app.example.test", {"OIDC-CLIENT-002"}),
+        ("https://app.example.test", set()),
+        ("${authBaseUrl}", set()),
+        (None, set()),
+    ],
+)
+def test_relative_redirect_is_checked_against_root_url(
+    root_url: str | None, expected: set[str]
+) -> None:
+    client = confidential_client(redirectUris=["/callback"])
+    if root_url is not None:
+        client["rootUrl"] = root_url
+    assert ids(audit_keycloak({"clients": [client]}, "relative.json")) == expected
 
 
 def test_rule_functions_ignore_unrelated_shapes() -> None:

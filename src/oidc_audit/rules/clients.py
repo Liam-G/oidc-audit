@@ -27,6 +27,17 @@ def _is_production(realm: dict[str, Any]) -> bool:
     return isinstance(marker, str) and marker.lower() in {"prod", "production"}
 
 
+def _resolve_redirect(redirect: str, root_url: Any) -> str:
+    """Keycloak resolves a relative redirect URI against the client's root URL;
+    without an absolute one it stays on Keycloak's own origin."""
+    parsed = urlsplit(redirect)
+    if parsed.scheme or parsed.netloc or not isinstance(root_url, str):
+        return redirect
+    if urlsplit(root_url).scheme not in {"http", "https"}:
+        return redirect
+    return root_url.rstrip("/") + "/" + redirect.lstrip("/")
+
+
 def _integer(value: Any, fallback: int) -> int:
     try:
         return int(value)
@@ -66,7 +77,7 @@ def audit_keycloak(
                 if not isinstance(redirect, str):
                     continue
                 redirect_path = f"{path}.redirectUris[{redirect_index}]"
-                parsed = urlsplit(redirect)
+                parsed = urlsplit(_resolve_redirect(redirect, client.get("rootUrl")))
                 if "*" in redirect:
                     findings.append(
                         Finding(

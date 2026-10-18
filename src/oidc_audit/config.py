@@ -10,7 +10,7 @@ from typing import Any
 if sys.version_info >= (3, 11):
     import tomllib
 else:  # pragma: no cover - exercised by the Python 3.10 CI job
-    import tomli as tomllib  # type: ignore[import-not-found]
+    import tomli as tomllib  # type: ignore[import-not-found, unused-ignore]
 
 from .loaders import ConfigurationError
 

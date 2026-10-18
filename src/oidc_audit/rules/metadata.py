@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 
 from ..catalog import RULES
 from ..models import Finding
-from ..urls import is_secure_url
+from ..urls import is_loopback_url, is_secure_url
 
 ENDPOINT_FIELDS = (
     "authorization_endpoint",
@@ -41,9 +41,11 @@ def audit_metadata(
     if expected_issuer is not None and issuer != expected_issuer:
         findings.append(Finding(RULES["OIDC-META-001"], source, "$.issuer"))
 
+    # Loopback HTTP endpoints are only acceptable on a loopback development issuer.
+    local_issuer = isinstance(issuer, str) and is_loopback_url(issuer)
     for field in ENDPOINT_FIELDS:
         value = document.get(field)
-        if isinstance(value, str) and not is_secure_url(value):
+        if isinstance(value, str) and not is_secure_url(value, allow_loopback_http=local_issuer):
             findings.append(
                 Finding(
                     RULES["OIDC-META-002"], source, f"$.{field}", f"{field} does not use HTTPS."
@@ -88,6 +90,8 @@ def audit_metadata(
         )
 
     jwks_uri = document.get("jwks_uri")
-    if not isinstance(jwks_uri, str) or not is_secure_url(jwks_uri):
+    if not isinstance(jwks_uri, str) or not is_secure_url(
+        jwks_uri, allow_loopback_http=local_issuer
+    ):
         findings.append(Finding(RULES["OIDC-META-009"], source, "$.jwks_uri"))
     return findings

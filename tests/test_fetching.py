@@ -148,3 +148,20 @@ def test_loopback_issuer_fetches_its_http_jwks(monkeypatch: pytest.MonkeyPatch) 
     documents = fetching.fetch_issuer(issuer)
     assert documents.jwks_url == jwks_uri
     assert documents.jwks == {"keys": []}
+
+
+def test_remote_issuer_cannot_point_jwks_fetch_at_loopback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    issuer = "https://login.example.test/realms/main"
+    requested: list[str] = []
+
+    def fake_request(url: str, timeout: float) -> tuple[int, dict[str, str], bytes]:
+        requested.append(url)
+        document = {"issuer": issuer, "jwks_uri": "http://127.0.0.1:9000/internal"}
+        return 200, {}, json.dumps(document).encode()
+
+    monkeypatch.setattr(fetching, "_request_once", fake_request)
+    documents = fetching.fetch_issuer(issuer)
+    assert requested == [f"{issuer}/.well-known/openid-configuration"]
+    assert documents.jwks is None

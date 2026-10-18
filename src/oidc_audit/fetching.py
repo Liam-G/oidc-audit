@@ -10,7 +10,7 @@ from typing import Any
 from urllib.parse import urljoin, urlsplit
 
 from .loaders import ConfigurationError
-from .urls import is_loopback, is_secure_url
+from .urls import is_loopback, is_loopback_url, is_secure_url
 
 MAX_RESPONSE_SIZE = 2 * 1024 * 1024
 MAX_REDIRECTS = 3
@@ -110,7 +110,9 @@ def fetch_issuer(issuer: str, *, timeout: float = 10.0) -> IssuerDocuments:
     raw_jwks_url = discovery.get("jwks_uri")
     if not isinstance(raw_jwks_url, str):
         return IssuerDocuments(issuer, final_discovery_url, discovery, None, None)
-    if not is_secure_url(raw_jwks_url):
+    # Plain HTTP to loopback is for local labs only: a remote issuer must not be
+    # able to point the fetcher at services on the machine running the audit.
+    if not is_secure_url(raw_jwks_url, allow_loopback_http=is_loopback_url(issuer)):
         return IssuerDocuments(issuer, final_discovery_url, discovery, raw_jwks_url, None)
     final_jwks_url, jwks = fetch_json(raw_jwks_url, timeout=timeout)
     return IssuerDocuments(issuer, final_discovery_url, discovery, final_jwks_url, jwks)
