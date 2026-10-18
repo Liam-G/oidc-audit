@@ -1,0 +1,9 @@
+{
+  "keys": [
+    {"kty": "RSA", "kid": "duplicate", "n": "AQAB", "e": "AQAB", "d": "private"},
+    {"kty": "RSA", "kid": "duplicate", "n": "AQAB", "e": "AQAB", "use": "sig", "alg": "RS256"},
+    {"kty": "oct", "k": "must-never-appear", "use": "sig", "alg": "HS256"},
+    {"kty": "EC", "crv": "secp256k1", "x": "public", "y": "public", "use": "sig", "alg": "ES256"}
+  ]
+}
+

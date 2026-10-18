@@ -1,0 +1,32 @@
+{
+  "realm": "good-realm",
+  "enabled": true,
+  "attributes": {"environment": "production"},
+  "accessTokenLifespan": 900,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+  "clients": [
+    {
+      "clientId": "good-public-app",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["https://app.example.test/callback"],
+      "attributes": {"pkce.code.challenge.method": "S256"}
+    },
+    {
+      "clientId": "good-service",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [],
+      "attributes": {"access.token.lifespan": "600"}
+    }
+  ]
+}
+

@@ -1,0 +1,7 @@
+[oidc-audit]
+format = "text"
+min-severity = "medium"
+disable = []
+max-access-token-lifetime = 900
+include-keycloak-builtins = false
+timeout = 10.0

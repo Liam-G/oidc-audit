@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.coverage
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+build/
+dist/
+
+# Identity-provider exports and reports may contain sensitive data.
+*.report.json
+*.sarif
+reports/
+realm-export*.json
+*.env
+
